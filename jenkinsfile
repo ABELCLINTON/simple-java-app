@@ -7,9 +7,9 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
+         stage('Checkout') {
             steps {
-                checkout scm
+                git branch: 'main', url: 'https://github.com/ABELCLINTON/simple-java-app.git'
             }
         }
 
