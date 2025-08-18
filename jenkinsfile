@@ -1,10 +1,14 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'maven-3'
+    }
+
     stages {
-        stage('Hello') {
+        stage('checkout') {
             steps {
-                echo 'Hello World'
+                git branch: 'main', url:'https://github.com/ABELCLINTON/simple-java-app.git'
             }
         }
     }
