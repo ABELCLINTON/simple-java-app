@@ -26,7 +26,6 @@ pipeline {
                 script {
                     sh '''
                     (Get-ECRLoginCommand).Password | docker login --username AWS --password-stdin 927788617166.dkr.ecr.eu-north-1.amazonaws.com
-                    docker build -t jenkins-docker-push .
                     docker tag jenkins-docker-push:latest 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push:latest
                     docker push 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push:latest
                     '''
