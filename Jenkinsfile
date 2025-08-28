@@ -14,14 +14,14 @@ pipeline {
                 sh 'mvn clean install'
             }
         }
-        stage(docker build) {
+        stage('docker build') {
             steps {
                 script {
-                    sh 'docker build -t simple-java-app-private .'
+                    sh 'docker build -t simple-java-app .'
                 }
             }
         }
-        stage(dockerimage push to ecr) {
+        stage('dockerimage push to ecr') {
             steps {
                 script {
                     sh '''
