@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    environment {
-        registry = 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push
-    }
     tools {
         maven 'maven-3' // Or whatever name you've configured for Maven in Jenkins
     }
