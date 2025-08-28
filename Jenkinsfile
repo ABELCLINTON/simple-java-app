@@ -1,6 +1,8 @@
 pipeline {
     agent any
-   
+    environment {
+        registry = 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push
+    }
     tools {
         maven 'maven-3' // Or whatever name you've configured for Maven in Jenkins
     }
@@ -12,25 +14,26 @@ pipeline {
                 sh 'mvn clean install'
             }
         }
-        stage('docker build') {
+        stage(docker build) {
             steps {
                 script {
-                    sh 'docker build -t simple-java-app .'
+                    sh 'docker build -t simple-java-app-private .'
                 }
             }
         }
-        stage('dockerimage push to ecr') {
+        stage(dockerimage push to ecr) {
             steps {
                 script {
                     sh '''
                     (Get-ECRLoginCommand).Password | docker login --username AWS --password-stdin 927788617166.dkr.ecr.eu-north-1.amazonaws.com
+                    docker build -t jenkins-docker-push .
                     docker tag jenkins-docker-push:latest 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push:latest
                     docker push 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push:latest
                     '''
                 }
             }
         }
-        
+    }  
 
     post {
         success {
@@ -40,5 +43,4 @@ pipeline {
             echo 'Build failed.'
         }
     }
-            
 }
