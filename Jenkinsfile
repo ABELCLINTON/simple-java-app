@@ -14,8 +14,11 @@ pipeline {
         stage('docker build') {
             steps {
                 script {
-                    sh 'docker build -t simple-java-app .'
-
+                    sh '''
+                    #!/bin/bash
+                    echo "Using bash"
+                    docker build -t simple-java-app .
+                    '''
                 }
             }
         }
