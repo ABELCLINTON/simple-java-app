@@ -13,8 +13,7 @@ pipeline {
         }
         stage('docker build') {
             steps {
-                script {
-                    docker.build("simple-java-app")
+                sh 'docker build -t simple-java-app .'
                 }
             }
         }
