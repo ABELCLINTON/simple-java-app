@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     tools {
         maven 'maven-3' // Or whatever name you've configured for Maven in Jenkins
     }
@@ -14,7 +15,7 @@ pipeline {
         stage('docker build') {
             steps {
                 sh 'docker build -t simple-java-app .'
-                }
+                
             }
         }
         stage('dockerimage push to ecr') {
@@ -39,4 +40,4 @@ pipeline {
             echo 'Build failed.'
         }
     }
-}
+}    
