@@ -14,7 +14,8 @@ pipeline {
         }
         stage('docker build') {
             steps {
-                sh 'docker build -t simple-java-app .'
+                sudo docker build -t simple-java-app .
+
                 
             }
         }
