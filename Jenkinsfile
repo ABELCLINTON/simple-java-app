@@ -10,7 +10,7 @@ pipeline {
         MAVEN_OPTS = "-Dmaven.repo.local=/var/lib/jenkins/.m2/repository"
         AWS_ACCOUNT_ID = "927788617166"
         AWS_REGION     = "eu-north-1"
-        ECR_REPO       = "jenkins-docker-push"
+        ECR_REPO       = "simple-java-app"
         IMAGE_TAG      = "latest"
     }
 
