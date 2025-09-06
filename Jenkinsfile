@@ -2,44 +2,57 @@ pipeline {
     agent any
 
     tools {
-        maven 'maven-3' // Or whatever name you've configured for Maven in Jenkins
+        maven 'maven-3'
+    }
+
+    environment {
+        // Cache Maven dependencies
+        MAVEN_OPTS = "-Dmaven.repo.local=/var/lib/jenkins/.m2/repository"
+        AWS_ACCOUNT_ID = "927788617166"
+        AWS_REGION     = "eu-north-1"
+        ECR_REPO       = "jenkins-docker-push"
+        IMAGE_TAG      = "latest"
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/ABELCLINTON/simple-java-app']])
-                sh 'mvn clean install'
+                checkout scm
             }
         }
-        stage('docker build') {
-            steps {
-                sh 'docker build -t simple-java-app .'
 
-
-                
-            }
-        }
-        stage('dockerimage push to ecr') {
+        stage('Build with Maven') {
             steps {
-                script {
-                    sh '''
-                    (Get-ECRLoginCommand).Password | docker login --username AWS --password-stdin 927788617166.dkr.ecr.eu-north-1.amazonaws.com
-                    docker build -t jenkins-docker-push .
-                    docker tag jenkins-docker-push:latest 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push:latest
-                    docker push 927788617166.dkr.ecr.eu-north-1.amazonaws.com/jenkins-docker-push:latest
-                    '''
-                }
+                sh 'mvn clean install -DskipTests'
             }
         }
-    }  
+
+        stage('Docker Build') {
+            steps {
+                sh '''
+                docker build -t ${ECR_REPO}:${IMAGE_TAG} .
+                '''
+            }
+        }
+
+        stage('Push to ECR') {
+            steps {
+                sh '''
+                aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                docker tag ${ECR_REPO}:${IMAGE_TAG} ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+                docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}:${IMAGE_TAG}
+                '''
+            }
+        }
+    }
 
     post {
         success {
-            echo 'Build completed successfully!'
+            echo '✅ Build & Push completed successfully!'
         }
         failure {
-            echo 'Build failed.'
+            echo '❌ Build failed.'
         }
     }
-}    
+}
+
