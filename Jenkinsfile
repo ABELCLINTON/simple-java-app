@@ -9,8 +9,8 @@ pipeline {
         // Cache Maven dependencies
         MAVEN_OPTS = "-Dmaven.repo.local=/var/lib/jenkins/.m2/repository"
         AWS_ACCOUNT_ID = "927788617166"
-        AWS_ACCESS_KEY_ID = "AKIA5QBECZXHEO7AHIQQ"
-        AWS_SECRET_ACCESS_KEY = "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"
+        AWS_ACCESS_KEY_ID = "AKIA5QBECZXHJGWC4Q4N"
+        AWS_SECRET_ACCESS_KEY = "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"
         AWS_REGION     = "eu-north-1"
         ECR_REPO       = "simple-java-app"
         IMAGE_TAG      = "latest"
