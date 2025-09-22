@@ -12,7 +12,7 @@ pipeline {
         AWS_ACCESS_KEY_ID = "AKIA5QBECZXHJGWC4Q4N"
         AWS_SECRET_ACCESS_KEY = "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"
         AWS_REGION     = "eu-north-1"
-        ECR_REPO       = "simple-java-app"
+        ECR_REPO       = "new-ecr"
         IMAGE_TAG      = "latest"
     }
 
