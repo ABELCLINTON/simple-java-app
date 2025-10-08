@@ -6,20 +6,17 @@ pipeline {
     }
 
     environment {
-        // Cache Maven dependencies
-        MAVEN_OPTS = "-Dmaven.repo.local=/var/lib/jenkins/.m2/repository"
+        MAVEN_OPTS     = "-Dmaven.repo.local=/var/lib/jenkins/.m2/repository"
         AWS_ACCOUNT_ID = "927788617166"
-        AWS_ACCESS_KEY_ID = "AKIA5QBECZXHJGWC4Q4N"
-        AWS_SECRET_ACCESS_KEY = "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"
-        AWS_REGION     = "eu-north-1"
-        ECR_REPO       = "new-ecr"
-        IMAGE_TAG      = "latest"
+        AWS_REGION     = "us-east-1"        // must match Terraform provider
+        ECR_REPO       = "terra-ecr"
+        IMAGE_TAG      = "${BUILD_NUMBER}" // auto-increment tag
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/ABELCLINTON/simple-java-app.git']])
             }
         }
 
@@ -29,31 +26,67 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Docker Build & Push to ECR') {
             steps {
-                sh '''
-                docker build -t ${ECR_REPO}:${IMAGE_TAG} .
-                '''
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
+                    docker build -t terra-ecr .
+                    docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+                    docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+                    '''
+                }
             }
         }
 
-        stage('Push to ECR') {
+        stage('Terraform Init/Plan/Apply') {
             steps {
-                sh '''
-                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
-                docker tag new-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/new-ecr:latest
-                docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/new-ecr:latest
-                '''
+                dir('ECS,JEN,DOCK$DEPLOY') {
+                    withCredentials([
+                        string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    ]) {
+                        sh """
+                          terraform init -input=false
+                          terraform plan -out=tfplan -input=false \
+                            -var="aws_account_id=${AWS_ACCOUNT_ID}" \
+                            -var="aws_region=${AWS_REGION}" \
+                            -var="ecr_repo=${ECR_REPO}" \
+                            -var="image_tag=${IMAGE_TAG}"
+                          terraform apply -input=false -auto-approve tfplan
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to ECS') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                    aws ecs update-service \
+                      --cluster fargate-cluster \
+                      --service fargate-service \
+                      --force-new-deployment \
+                      --region ${AWS_REGION}
+                    '''
+                }
             }
         }
     }
 
     post {
         success {
-            echo '✅ Build & Push completed successfully!'
+            echo '✅ Build, Push, Terraform Apply & ECS Deploy completed successfully!'
         }
         failure {
-            echo '❌ Build failed.'
+            echo '❌ Pipeline failed.'
         }
     }
 }
