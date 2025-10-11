@@ -27,31 +27,21 @@ pipeline {
         }
 
         stage('Docker Build & Push to ECR') {
-    steps {
-        script {
-            withCredentials([
-                string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-            ]) {
-                def ecrRepo = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
-                sh '''
-                    set -e
-                    echo "Logging in to Amazon ECR..."
-                    aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-
-                    echo "Building Docker image..."
-                    docker build -t ${ECR_REPO}:${IMAGE_TAG} .
-
-                    echo "Tagging image..."
-                    docker tag ${ECR_REPO}:${IMAGE_TAG} ${ecrRepo}:${IMAGE_TAG}
-
-                    echo "Pushing image to ECR..."
-                    docker push ${ecrRepo}:${IMAGE_TAG}
-                '''
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                    set -xe
+                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
+                    docker build -t terra-ecr .
+                    docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+                    docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+                    '''
+                }
             }
         }
-    }
-}
 
         stage('Terraform Init/Plan/Apply') {
             steps {
@@ -102,5 +92,4 @@ pipeline {
         }
     }
 }
-
 
