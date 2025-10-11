@@ -44,7 +44,7 @@ pipeline {
 
         stage('Terraform Init/Plan/Apply') {
             steps {
-                dir('ECS,JEN,DOCK$DEPLOY') {
+                dir('simple-java-app') {
                     withCredentials([
                         string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                         string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
