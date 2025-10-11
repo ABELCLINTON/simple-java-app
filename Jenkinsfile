@@ -45,12 +45,13 @@ pipeline {
 
         stage('Terraform Init/Plan/Apply') {
             steps {
-                dir('simple-java-app') {
+                dir('ecsfargate.tf') {
                     withCredentials([
                         string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                         string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                     ]) {
                         sh """
+                        set -xe
                           terraform init -input=false
                           terraform plan -out=tfplan -input=false \
                             -var="aws_account_id=${AWS_ACCOUNT_ID}" \
