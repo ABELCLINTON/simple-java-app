@@ -27,21 +27,25 @@ pipeline {
         }
 
         stage('Docker Build & Push to ECR') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
-                    sh '''
-                    set -xe
-                    aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
-                    docker build -t terra-ecr .
-                    docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
-                    docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
-                    '''
-                }
-            }
+    steps {
+        echo 'Starting Docker build and push stage...'
+        withCredentials([
+            string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+            string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+        ]) {
+            sh '''
+set -xe
+echo "Docker path: $(which docker)"
+echo "AWS path: $(which aws)"
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
+docker build -t terra-ecr .
+docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+'''
         }
+    }
+}
+
 
         stage('Terraform Init/Plan/Apply') {
             steps {
