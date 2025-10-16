@@ -37,11 +37,13 @@ pipeline {
                     string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
-                    sh '''
+                    sh '''#!/bin/bash
 set -xe
 echo "Docker path: $(which docker)"
 echo "AWS path: $(which aws)"
+
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
+
 docker build -t terra-ecr .
 docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
 docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
@@ -57,7 +59,7 @@ docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
                         string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                         string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                     ]) {
-                        sh '''
+                        sh '''#!/bin/bash
 set -xe
 terraform init -input=false
 terraform plan -out=tfplan -input=false \
@@ -78,7 +80,7 @@ terraform apply -input=false -auto-approve tfplan
                     string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
-                    sh '''
+                    sh '''#!/bin/bash
 set -xe
 aws ecs update-service \
   --cluster fargate-cluster \
@@ -101,3 +103,4 @@ aws ecs update-service \
     }
 }
 
+   
