@@ -20,7 +20,7 @@ pipeline {
                     branches: [[name: '*/main']],
                     extensions: [],
                     userRemoteConfigs: [[url: 'https://github.com/ABELCLINTON/simple-java-app.git']]
-                )
+                )    
             }
         }
 
@@ -38,16 +38,16 @@ pipeline {
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh '''#!/bin/bash
-set -xe
-echo "Docker path: $(which docker)"
-echo "AWS path: $(which aws)"
+                        set -xe
+                        echo "Docker path: $(which docker)"
+                        echo "AWS path: $(which aws)"
 
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
 
-docker build -t terra-ecr .
-docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
-docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
-'''
+                        docker build -t terra-ecr .
+                        docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+                        docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
+                    '''
                 }
             }
         }
@@ -58,17 +58,17 @@ docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:latest
                     withCredentials([
                         string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                         string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                    ]) {
+                        ]) {
                         sh '''#!/bin/bash
-set -xe
-terraform init -input=false
-terraform plan -out=tfplan -input=false \
-  -var="aws_account_id=${AWS_ACCOUNT_ID}" \
-  -var="aws_region=${AWS_REGION}" \
-  -var="ecr_repo=${ECR_REPO}" \
-  -var="image_tag=${IMAGE_TAG}"
-terraform apply -input=false -auto-approve tfplan
-'''
+                            set -xe
+                            terraform init -input=false
+                            terraform plan -out=tfplan -input=false \
+                            -var="aws_account_id=${AWS_ACCOUNT_ID}" \
+                            -var="aws_region=${AWS_REGION}" \
+                            -var="ecr_repo=${ECR_REPO}" \
+                            -var="image_tag=${IMAGE_TAG}"
+                            terraform apply -input=false -auto-approve tfplan
+                        '''
                     }
                 }
             }
@@ -79,15 +79,15 @@ terraform apply -input=false -auto-approve tfplan
                 withCredentials([
                     string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
                     string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
+                    ]) {
                     sh '''#!/bin/bash
-set -xe
-aws ecs update-service \
-  --cluster fargate-cluster \
-  --service fargate-service \
-  --force-new-deployment \
-  --region ${AWS_REGION}
-'''
+                        set -xe
+                        aws ecs update-service \
+                        --cluster fargate-cluster \
+                        --service fargate-service \
+                        --force-new-deployment \
+                        --region ${AWS_REGION}
+                    '''
                 }
             }
         }
@@ -103,4 +103,3 @@ aws ecs update-service \
     }
 }
 
-   
