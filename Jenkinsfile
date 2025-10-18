@@ -17,7 +17,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/ABELCLINTON/simple-java-app.git']])
-                )    
+                
             }
         }
 
