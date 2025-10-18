@@ -46,6 +46,44 @@ pipeline {
                 '''
             }
         }
+        stage('Terraform Init/Plan/Apply') {
+            steps {
+                dir('ecsfargate.tf') {
+                    withCredentials([
+                        string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    ]) {
+                        sh '''
+                            set -xe
+                            terraform init -input=false
+                            terraform plan -out=tfplan -input=false \
+                            -var="aws_account_id=${AWS_ACCOUNT_ID}" \
+                            -var="aws_region=${AWS_REGION}" \
+                            -var="ecr_repo=${ECR_REPO}" \
+                            -var="image_tag=${IMAGE_TAG}"
+                            terraform apply -input=false -auto-approve tfplan
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to ECS') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                ]) {
+                    sh '''
+                        aws ecs update-service \
+                        --cluster fargate-cluster \
+                        --service fargate-service \
+                        --force-new-deployment \
+                        --region ${AWS_REGION}
+                    '''
+                }
+            }
+        }
     }
 
     post {
