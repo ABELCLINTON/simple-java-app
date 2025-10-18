@@ -48,24 +48,19 @@ pipeline {
         }
         stage('Terraform Init/Plan/Apply') {
             steps {
-                dir('ecsfargate.tf') {
-                    withCredentials([
-                        string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                        string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
-                    ]) {
+                withCredentials([[
+                   $class: 'AmazonWebServicesCredentialsBinding',
+                   credentialsId: '927788617166'  // Jenkins credential ID
+                ]]) {
+                    dir('ecsfargate.tf') {
                         sh '''
-                            set -xe
                             terraform init -input=false
-                            terraform plan -out=tfplan -input=false \
-                            -var="aws_account_id=${AWS_ACCOUNT_ID}" \
-                            -var="aws_region=${AWS_REGION}" \
-                            -var="ecr_repo=${ECR_REPO}" \
-                            -var="image_tag=${IMAGE_TAG}"
+                            terraform plan -out=tfplan -input=false
                             terraform apply -input=false -auto-approve tfplan
                         '''
-                    }
+                   }
                 }
-            }
+           }
         }
 
         stage('Deploy to ECS') {
