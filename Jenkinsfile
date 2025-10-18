@@ -41,8 +41,8 @@ pipeline {
             steps {
                 sh '''
                 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
-                docker tag terra-ecr:latest 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:${BUILD_NUMBER}
-                docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/terra-ecr:${BUILD_NUMBER}
+                docker tag $ECR_REPO:$IMAGE_TAG 927788617166.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
                 '''
             }
         }
