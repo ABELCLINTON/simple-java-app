@@ -3,6 +3,7 @@ pipeline {
 
     tools {
         maven 'maven-3'
+        terraform 'terraform-latest'
     }
 
     environment {
@@ -48,7 +49,7 @@ pipeline {
         }
         stage('Terraform Init/Plan/Apply') {
             steps {
-                dir('ecsfargate.tf') {
+                dir("${TF_DIR}") {
                     withCredentials([
                         string(credentialsId: 'AKIA5QBECZXHJGWC4Q4N', variable: 'AWS_ACCESS_KEY_ID'),
                         string(credentialsId: 'VkJVVB9Ebw3Wyz9lHQwKF5rM/Kfh1mcvh5zhNIih', variable: 'AWS_SECRET_ACCESS_KEY')
