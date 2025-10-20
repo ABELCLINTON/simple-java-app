@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         maven 'maven-3'
-        terraform 'terraform-latest'
+        
     }
 
     environment {
