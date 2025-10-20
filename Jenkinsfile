@@ -49,17 +49,17 @@ pipeline {
         }
         stage('Terraform Init/Plan/Apply') {
             steps {
-                withCredentials([
-                    string(credentialsId: 'AKIA5QBECZXHJGWC4Q4N', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'VkJVVB9Ebw3Wyz9lHQwKF5rM/Kfh1mcvh5zhNIih', variable: 'AWS_SECRET_ACCESS_KEY')
-                    ]) {
-                    sh '''#!/bin/bash
-                    set -xe
-                    terraform init
-                    terraform plan -out=tfplan
-                    terraform apply -input=false -auto-approve tfplan
-                    '''
-                   
+                withCredentials([[
+                   $class: 'AmazonWebServicesCredentialsBinding',
+                   credentialsId: '927788617166'  // Jenkins credential ID
+                ]]) {
+                    dir('simple-java-app') {
+                        sh '''
+                        terraform init -input=false
+                        terraform plan -out=tfplan -input=false
+                        terraform apply -input=false -auto-approve tfplan
+                        '''
+                   }
                 }
             }
         }
