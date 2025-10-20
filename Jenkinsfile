@@ -48,35 +48,48 @@ pipeline {
         }
         stage('Terraform Init/Plan/Apply') {
             steps {
-                withCredentials([[
-                   $class: 'AmazonWebServicesCredentialsBinding',
-                   credentialsId: '927788617166'  // Jenkins credential ID
-                ]]) {
-                    dir('ecsfargate.tf') {
-                        sh '''
-                            terraform init -input=false
-                            terraform plan -out=tfplan -input=false
-                            terraform apply -input=false -auto-approve tfplan
+                dir('ecsfargate.tf') {
+                    withCredentials([
+                        string(credentialsId: 'AKIA5QBECZXHJGWC4Q4N', variable: 'AWS_ACCESS_KEY_ID'),
+                        string(credentialsId: 'VkJVVB9Ebw3Wyz9lHQwKF5rM/Kfh1mcvh5zhNIih', variable: 'AWS_SECRET_ACCESS_KEY')
+                        ]) {
+                        sh '''#!/bin/bash
+                        set -xe
+                        terraform init -input=false
+                        terraform plan -out=tfplan -input=false \
+                        -var="aws_account_id=${927788617166}" \
+                        -var="aws_region=${AWS_REGION}" \
+                        -var="ecr_repo=${ECR_REPO}" \
+                        -var="image_tag=${IMAGE_TAG}"
+                        terraform apply -input=false -auto-approve tfplan
                         '''
-                   }
+                    }
                 }
-           }
+            }
         }
 
         stage('Deploy to ECS') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+                    string(credentialsId: 'AKIA5QBECZXHJGWC4Q4N', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'VkJVVB9Ebw3Wyz9lHQwKF5rM/Kfh1mcvh5zhNIih', variable: 'AWS_SECRET_ACCESS_KEY')
                 ]) {
                     sh '''
-                        aws ecs update-service \
-                        --cluster fargate-cluster \
-                        --service fargate-service \
-                        --force-new-deployment \
-                        --region ${AWS_REGION}
+                    aws ecs update-service \
+                    --cluster fargate-cluster \
+                    --service fargate-service \
+                    --force-new-deployment \
+                    --region ${AWS_REGION}
                     '''
                 }
+            }
+        }
+         stage('Terraform Destroy (Cleanup)') {
+            steps {
+                input message: 'Proceed to destroy the infrastructure?', ok: 'Yes, destroy'
+                sh '''
+                terraform destroy -auto-approve
+                '''
             }
         }
     }
