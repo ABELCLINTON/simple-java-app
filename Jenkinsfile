@@ -49,22 +49,21 @@ pipeline {
         }
         stage('Terraform Init/Plan/Apply') {
             steps {
-                dir('ecsfargate.tf') {
-                    withCredentials([
-                        string(credentialsId: 'AKIA5QBECZXHJGWC4Q4N', variable: 'AWS_ACCESS_KEY_ID'),
-                        string(credentialsId: 'VkJVVB9Ebw3Wyz9lHQwKF5rM/Kfh1mcvh5zhNIih', variable: 'AWS_SECRET_ACCESS_KEY')
-                        ]) {
-                        sh '''#!/bin/bash
-                        set -xe
-                        terraform init -input=false
-                        terraform plan -out=tfplan -input=false \
-                        -var="aws_account_id=${927788617166}" \
-                        -var="aws_region=${AWS_REGION}" \
-                        -var="ecr_repo=${ECR_REPO}" \
-                        -var="image_tag=${IMAGE_TAG}"
-                        terraform apply -input=false -auto-approve tfplan
-                        '''
-                    }
+                withCredentials([
+                    string(credentialsId: 'AKIA5QBECZXHJGWC4Q4N', variable: 'AWS_ACCESS_KEY_ID'),
+                    string(credentialsId: 'VkJVVB9Ebw3Wyz9lHQwKF5rM/Kfh1mcvh5zhNIih', variable: 'AWS_SECRET_ACCESS_KEY')
+                    ]) {
+                    sh '''#!/bin/bash
+                    set -xe
+                    terraform init -input=false
+                    terraform plan -out=tfplan -input=false \
+                    -var="aws_account_id=${927788617166}" \
+                    -var="aws_region=${AWS_REGION}" \
+                    -var="ecr_repo=${ECR_REPO}" \
+                    -var="image_tag=${IMAGE_TAG}"
+                    terraform apply -input=false -auto-approve tfplan
+                    '''
+                   
                 }
             }
         }
