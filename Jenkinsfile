@@ -55,12 +55,8 @@ pipeline {
                     ]) {
                     sh '''#!/bin/bash
                     set -xe
-                    terraform init -input=false
-                    terraform plan -out=tfplan -input=false \
-                    -var="aws_account_id=${927788617166}" \
-                    -var="aws_region=${AWS_REGION}" \
-                    -var="ecr_repo=${ECR_REPO}" \
-                    -var="image_tag=${IMAGE_TAG}"
+                    terraform init
+                    terraform plan -out=tfplan
                     terraform apply -input=false -auto-approve tfplan
                     '''
                    
