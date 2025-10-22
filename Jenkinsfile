@@ -15,6 +15,7 @@ pipeline {
         AWS_REGION     = "eu-north-1"
         ECR_REPO       = "terra-ecr"
         IMAGE_TAG      = "${BUILD_NUMBER}"
+        TF_DIR = './ecsfargate.tf'
     }
 
     stages {
@@ -47,40 +48,57 @@ pipeline {
                 '''
             }
         }
-        stage('Terraform Init/Plan/Apply') {
+        stage('Terraform Init') {
             steps {
-                withCredentials([[
-                   $class: 'AmazonWebServicesCredentialsBinding',
-                   credentialsId: '927788617166'  // Jenkins credential ID
-                ]]) {
-                    dir('simple-java-app') {
-                        sh '''
-                        terraform init -input=false
-                        terraform plan -out=tfplan -input=false
-                        terraform apply -input=false -auto-approve tfplan
-                        '''
-                   }
-                }
-            }
-        }
-
-        stage('Deploy to ECS') {
-            steps {
-                withCredentials([
-                    string(credentialsId: 'AKIA5QBECZXHJGWC4Q4N', variable: 'AWS_ACCESS_KEY_ID'),
-                    string(credentialsId: 'VkJVVB9Ebw3Wyz9lHQwKF5rM/Kfh1mcvh5zhNIih', variable: 'AWS_SECRET_ACCESS_KEY')
-                ]) {
+                dir("${env.TF_DIR}") {
                     sh '''
-                    aws ecs update-service \
-                    --cluster fargate-cluster \
-                    --service fargate-service \
-                    --force-new-deployment \
-                    --region ${AWS_REGION}
+                        terraform init -input=false
                     '''
                 }
             }
         }
-         stage('Terraform Destroy (Cleanup)') {
+
+        stage('Terraform Validate') {
+            steps {
+                dir("${env.TF_DIR}") {
+                    sh '''
+                        terraform validate
+                    '''
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                dir("${env.TF_DIR}") {
+                    sh '''
+                        terraform plan -out=tfplan -input=false
+                    '''
+                }
+            }
+        }
+
+        stage('Terraform Apply (Deploy ECS)') {
+            steps {
+                dir("${env.TF_DIR}") {
+                    sh '''
+                        terraform apply -auto-approve tfplan
+                    '''
+                }
+            }
+        }
+
+        stage('Post-Deploy Info') {
+            steps {
+                dir("${env.TF_DIR}") {
+                    sh '''
+                        terraform output
+                    '''
+                }
+            }
+        }
+      
+        stage('Terraform Destroy (Cleanup)') {
             steps {
                 input message: 'Proceed to destroy the infrastructure?', ok: 'Yes, destroy'
                 sh '''
