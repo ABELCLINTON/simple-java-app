@@ -15,7 +15,7 @@ pipeline {
         AWS_REGION     = "eu-north-1"
         ECR_REPO       = "terra-ecr"
         IMAGE_TAG      = "${BUILD_NUMBER}"
-        TF_DIR = './ecsfargate.tf'
+        TF_DIR = '.'
     }
 
     stages {
