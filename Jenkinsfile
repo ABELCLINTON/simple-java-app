@@ -72,7 +72,7 @@ pipeline {
             steps {
                 dir("${env.TF_DIR}") {
                     sh '''
-                        terraform plan -out=tfplan -input=false
+                        terraform plan -var 'image_tag=${BUILD_NUMBER}' -out=tfplan
                     '''
                 }
             }
@@ -82,7 +82,7 @@ pipeline {
             steps {
                 dir("${env.TF_DIR}") {
                     sh '''
-                        terraform apply -auto-approve tfplan
+                        terraform apply -auto-approve -var 'image_tag=${BUILD_NUMBER}'
                     '''
                 }
             }
