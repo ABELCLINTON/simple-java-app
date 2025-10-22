@@ -5,7 +5,7 @@ variable "aws_account_id" {}
 variable "aws_region" {}
 variable "ecr_repo" {}
 variable "image_tag" {
-  default = "${BUILD_NUMBER}"
+  default = "latest"
 }
 
 #####################
