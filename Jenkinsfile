@@ -72,7 +72,12 @@ pipeline {
             steps {
                 dir("${env.TF_DIR}") {
                     sh '''
-                        terraform plan -var 'image_tag=${BUILD_NUMBER}' -out=tfplan
+                        terraform plan \
+                        -var 'aws_account_id=927788617166' \
+                        -var 'aws_region=us-east-1' \
+                        -var 'ecr_repo=terra-ecr' \
+                        -var 'image_tag=${BUILD_NUMBER}' \
+                        -out=tfplan
                     '''
                 }
             }
