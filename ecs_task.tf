@@ -1,8 +1,4 @@
-variable "image_tag" {
-  type        = string
-  description = "Docker image tag"
-  default     = "latest"
-}
+
 resource "aws_ecr_repository" "app" {
   name = var.ecr_repo
 }
