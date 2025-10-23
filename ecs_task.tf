@@ -1,6 +1,5 @@
-
-resource "aws_ecr_repository" "app" {
-  name = var.ecr_repo
+data "aws_ecr_repository" "app" {
+  name = "terra-ecr"
 }
 
 resource "aws_ecs_task_definition" "app" {
