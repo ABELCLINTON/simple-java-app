@@ -9,9 +9,9 @@ pipeline {
     environment {
         // Cache Maven dependencies
         MAVEN_OPTS = "-Dmaven.repo.local=/var/lib/jenkins/.m2/repository"
-        AWS_ACCOUNT_ID = "927788617166"
-        AWS_ACCESS_KEY_ID = "AKIA5QBECZXHJGWC4Q4N"
-        AWS_SECRET_ACCESS_KEY = "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"
+        AWS_ACCOUNT_ID = "898203562748"
+        AWS_ACCESS_KEY_ID = "AKIA5CII2WL6PHKUET6G"
+        AWS_SECRET_ACCESS_KEY = "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"
         AWS_REGION     = "eu-north-1"
         ECR_REPO       = "terra-ecr"
         IMAGE_TAG      = "${BUILD_NUMBER}"
@@ -42,9 +42,9 @@ pipeline {
         stage('Push to ECR') {
             steps {
                 sh '''
-                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 927788617166.dkr.ecr.us-east-1.amazonaws.com
-                docker tag $ECR_REPO:$IMAGE_TAG 927788617166.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-                docker push 927788617166.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 898203562748.dkr.ecr.us-east-1.amazonaws.com
+                docker tag terra-ecr:latest 898203562748.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+                docker push 898203562748.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPO:$IMAGE_TAG
                 '''
             }
         }
