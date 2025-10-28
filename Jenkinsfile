@@ -87,7 +87,7 @@ pipeline {
             steps {
                 dir("${env.TF_DIR}") {
                     sh '''
-                        terraform apply -auto-approve -var 'image_tag=${BUILD_NUMBER}'
+                        terraform apply -auto-approve -var "image_tag=${BUILD_NUMBER}"
                     '''
                 }
             }
