@@ -99,8 +99,13 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 resource "aws_lb" "alb" {
   name               = "fargate-alb"
   load_balancer_type = "application"
+  internal           = false  # 👈 explicitly mark as internet-facing
   security_groups    = [aws_security_group.fargate_sg.id]
-  subnets            = [aws_subnet.public_subnet_a.id, aws_subnet.public_subnet_b.id]
+  subnets            = [
+    aws_subnet.public_subnet_a.id,
+    aws_subnet.public_subnet_b.id
+  ]
+  enable_deletion_protection = false  # optional, prevents cleanup issues
 }
 
 resource "aws_lb_target_group" "tg" {
