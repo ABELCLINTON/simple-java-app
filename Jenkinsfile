@@ -73,7 +73,7 @@ pipeline {
                 dir("${env.TF_DIR}") {
                     sh '''
                         terraform plan \
-                        -var 'aws_account_id=898203562748' \
+                        -var 'aws_account_id=971431175998' \
                         -var 'aws_region=us-east-1' \
                         -var 'ecr_repo=terra-ecr' \
                         -var 'image_tag=${BUILD_NUMBER}' \
