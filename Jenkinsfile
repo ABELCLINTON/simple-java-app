@@ -9,7 +9,7 @@ pipeline {
     environment {
         // Cache Maven dependencies
         MAVEN_OPTS = "-Dmaven.repo.local=/var/lib/jenkins/.m2/repository"
-        AWS_ACCOUNT_ID = "898203562748"
+        AWS_ACCOUNT_ID = "971431175998"
         AWS_ACCESS_KEY_ID = "AKIA5CII2WL6PHKUET6G"
         AWS_SECRET_ACCESS_KEY = "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"
         AWS_REGION     = "eu-north-1"
