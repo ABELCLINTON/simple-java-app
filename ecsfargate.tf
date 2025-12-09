@@ -138,7 +138,7 @@ resource "aws_lb_listener" "listener" {
 
 # ECS Task Definition (Nginx)
 resource "aws_ecs_task_definition" "task1" {
-  family                   = "fargate-task"
+  family                   = "myservice-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
