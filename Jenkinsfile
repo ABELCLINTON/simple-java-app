@@ -103,14 +103,7 @@ pipeline {
             }
         }
       
-        stage('Terraform Destroy (Cleanup)') {
-            steps {
-                input message: 'Proceed to destroy the infrastructure?', ok: 'Yes, destroy'
-                sh '''
-                terraform destroy -auto-approve
-                '''
-            }
-        }
+        
     }
 
     post {
