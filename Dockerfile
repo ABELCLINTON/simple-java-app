@@ -7,6 +7,6 @@ RUN mvn package -DskipTests
 
 FROM amazoncorretto:17-alpine
 WORKDIR /app
-EXPOSE 80
+EXPOSE 8080
 COPY --from=builder /app/target/*.jar app.jar
 CMD ["java", "-jar", "app.jar"]
