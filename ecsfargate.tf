@@ -54,8 +54,8 @@ resource "aws_security_group" "fargate_sg" {
   name   = "fargate-sg"
 
   ingress {
-    from_port   = 80
-    to_port     = 80
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
@@ -110,7 +110,7 @@ resource "aws_lb" "alb" {
 
 resource "aws_lb_target_group" "tg" {
   name        = "fargate-tg"
-  port        = 80
+  port        = 8080
   protocol    = "HTTP"
   vpc_id      = aws_vpc.fargate_vpc.id
   target_type = "ip"
@@ -153,8 +153,8 @@ resource "aws_ecs_task_definition" "task1" {
       essential = true
       portMappings = [
         {
-          containerPort = 80
-          hostPort      = 80
+          containerPort = 8080
+          hostPort      = 8080
           protocol      = "tcp"
         }
       ]
@@ -178,7 +178,7 @@ resource "aws_ecs_service" "fargate_service" {
   load_balancer {
     target_group_arn = aws_lb_target_group.tg.arn
     container_name   = "simple-java-app"
-    container_port   = 80
+    container_port   = 8080
   }
 
   depends_on = [aws_lb_listener.listener]
